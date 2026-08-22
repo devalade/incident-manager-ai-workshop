@@ -35,6 +35,37 @@ const user = await db.orm.public.User
 // { id: number; email: string; username: string | null; name: string | null; createdAt: Date; posts: Post[] } | null
 ```
 
+### Typed collection helpers
+
+`Contract` is the generated client contract. A small application-level collection
+wrapper can add domain vocabulary while keeping the generated types underneath:
+
+```typescript
+import { db } from './src/prisma/db';
+import type { Contract } from './src/prisma/contract.d';
+
+class IncidentCollection extends Collection<Contract, 'Incident'> {
+  forService(service: string) {
+    return this.where({ service });
+  }
+
+  newestFirst() {
+    return this.orderBy((incident) => incident.createdAt.desc());
+  }
+}
+
+const incidents = await db.orm.public.Incident
+  .forService('payments')
+  .newestFirst()
+  .take(20)
+  .all();
+```
+
+`Collection` here is an application abstraction, not a Prisma Next export. The
+value is the intent-revealing chain: filtering and ordering rules get names that
+match the domain, while `Contract` keeps the model and field names checked by
+TypeScript.
+
 Your contract has two companion files in the same directory:
 
 - **`contract.json`** — this tells your application what models exist, just like `package-lock.json` tells your package manager what dependencies your project has
