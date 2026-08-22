@@ -6,7 +6,6 @@ Petite API TypeScript/Hono utilisée pour montrer qu'un agent ne peut pas compen
 
 ```bash
 npm install
-npm test
 npm run typecheck
 npm run dev
 ```
@@ -20,12 +19,12 @@ npm run dev
 
 ## Déroulé du workshop
 
-1. Donnez uniquement [TICKET.md](./TICKET.md) à votre agent et demandez-lui d'implémenter la fonctionnalité.
-2. Notez ses hypothèses, les changements proposés et les questions qu'il n'a pas posées.
-3. Interrogez l'Incident Manager joué par le facilitateur.
-4. Formalisez les règles découvertes, puis recommencez avec le même agent.
+1. Donnez uniquement [TICKET.md](./TICKET.md) à votre agent.
+2. Faites-lui d’abord caractériser le comportement actuel avec des tests, puis refactorer.
+3. Notez ses hypothèses, les changements proposés et les questions qu'il n'a pas posées.
+4. Interrogez l'Incident Manager joué par le facilitateur avant d’implémenter l’escalade automatique.
 5. Comparez le code, les tests, les allers-retours et la supervision nécessaire.
 
 > Participants : ne lisez pas `FACILITATOR.md` avant la phase d'entretien métier.
 
-Le code initial est volontairement naïf, mais il compile et ses tests passent. L'objectif n'est pas de deviner la « bonne » solution : c'est de découvrir les questions qui la rendent possible.
+Le code initial est volontairement désordonné et ne possède aucun test. Il compile et fonctionne. L’objectif est de créer un filet de sécurité avant le refactoring, puis de découvrir les questions métier nécessaires à la nouvelle fonctionnalité.

@@ -1,30 +1,65 @@
 import { Hono } from "hono";
-import { IncidentStore, type CreateIncident, type Severity } from "./incidents.js";
 
-const severities: Severity[] = ["SEV1", "SEV2", "SEV3", "SEV4"];
+type Incident = {
+  id: string;
+  title: string;
+  service: string;
+  severity: string;
+  status: string;
+  owner?: string;
+  createdAt: string;
+  escalated: boolean;
+};
 
-export function createApp(store = new IncidentStore()) {
+export function createApp() {
   const app = new Hono();
+  const incidents: Incident[] = [];
+  let nextId = 1;
 
   app.get("/health", (c) => c.json({ status: "ok" }));
-  app.get("/incidents", (c) => c.json(store.list()));
+  app.get("/incidents", (c) => {
+    const status = c.req.query("status");
+    if (status) return c.json(incidents.filter((item) => item.status === status));
+    return c.json(incidents);
+  });
 
   app.get("/incidents/:id", (c) => {
-    const incident = store.find(c.req.param("id"));
-    return incident ? c.json(incident) : c.json({ error: "Incident not found" }, 404);
+    const id = c.req.param("id");
+    for (const item of incidents) {
+      if (item.id === id) return c.json(item);
+    }
+    return c.json({ error: "Incident not found" }, 404);
   });
 
   app.post("/incidents", async (c) => {
-    const body = await c.req.json<Partial<CreateIncident>>();
-    if (!body.title || !body.service || !body.severity || !severities.includes(body.severity)) {
+    const body = await c.req.json<Record<string, unknown>>();
+    const severity = String(body.severity ?? "").toUpperCase();
+    if (!body.title || !body.service || !severity || !["SEV1", "SEV2", "SEV3", "SEV4"].includes(severity)) {
       return c.json({ error: "title, service and a valid severity are required" }, 400);
     }
-    return c.json(store.create(body as CreateIncident), 201);
+
+    const incident: Incident = {
+      id: String(nextId++),
+      title: String(body.title).trim(),
+      service: String(body.service).trim().toLowerCase(),
+      severity,
+      status: "open",
+      createdAt: new Date().toISOString(),
+      escalated: false,
+    };
+    incidents.push(incident);
+    return c.json(incident, 201);
   });
 
   app.post("/incidents/:id/escalate", (c) => {
-    const incident = store.escalate(c.req.param("id"));
-    return incident ? c.json(incident) : c.json({ error: "Incident not found" }, 404);
+    const id = c.req.param("id");
+    const incident = incidents.find((item) => item.id === id);
+    if (!incident) return c.json({ error: "Incident not found" }, 404);
+
+    // Manual escalation. Automatic escalation is the workshop feature.
+    incident.escalated = true;
+    incident.owner = "on-call";
+    return c.json(incident);
   });
 
   return app;
