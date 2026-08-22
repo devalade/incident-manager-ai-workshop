@@ -1,53 +1,21 @@
 import { Hono } from "hono";
 import { db } from "./prisma/db.js";
+import type { FieldOutputTypes } from "./prisma/contract.d.js";
 
-type Incident = {
-  id: string;
-  title: string;
-  service: string;
-  severity: string;
-  status: string;
-  owner?: string;
-  createdAt: string;
-  escalated: boolean;
-  acknowledgedAt?: string;
-  resolvedAt?: string;
-  tags: string[];
-  notes: string[];
+type Models = FieldOutputTypes["public"];
+type Mutable<T> = { -readonly [K in keyof T]: T[K] extends ReadonlyArray<infer Item> ? Item[] : T[K] };
+type Incident = Omit<Mutable<Models["Incident"]>, "id" | "owner" | "createdAt" | "acknowledgedAt" | "resolvedAt"> & {
+  id: string; owner?: string; createdAt: string; acknowledgedAt?: string; resolvedAt?: string;
 };
-
-type IncidentEvent = {
-  incidentId: string;
-  type: string;
-  at: string;
-  actor: string;
-  details?: string;
+type IncidentEvent = Omit<Mutable<Models["IncidentEvent"]>, "id" | "incidentId" | "at" | "details"> & {
+  incidentId: string; at: string; details?: string;
 };
-
-type Service = {
-  name: string;
-  team: string;
-  critical: boolean;
-  active: boolean;
-  businessHoursOnly: boolean;
+type Service = Mutable<Models["Service"]>;
+type MaintenanceWindow = Omit<Mutable<Models["MaintenanceWindow"]>, "id" | "startsAt" | "endsAt"> & {
+  id: string; startsAt: string; endsAt: string;
 };
-
-type MaintenanceWindow = {
-  id: string;
-  service: string;
-  startsAt: string;
-  endsAt: string;
-  reason: string;
-};
-
-type Notification = {
-  id: string;
-  incidentId: string;
-  channel: string;
-  recipient: string;
-  message: string;
-  sentAt: string;
-  status: "sent" | "failed";
+type Notification = Omit<Mutable<Models["Notification"]>, "id" | "incidentId" | "sentAt" | "status"> & {
+  id: string; incidentId: string; sentAt: string; status: "sent" | "failed";
 };
 
 export function createApp() {
