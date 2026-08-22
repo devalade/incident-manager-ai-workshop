@@ -37,20 +37,22 @@ const user = await db.orm.public.User
 
 ### Typed collection helpers
 
-`Contract` is the generated client contract. A small application-level collection
-wrapper can add domain vocabulary while keeping the generated types underneath:
+`Contract` is the generated client contract. A custom collection can add domain
+vocabulary while keeping the generated types underneath. This workshop registers
+the implementation from [`src/prisma/collections.ts`](src/prisma/collections.ts):
 
 ```typescript
 import { db } from './src/prisma/db';
+import { Collection } from '@prisma/orm-postgres/orm-client';
 import type { Contract } from './src/prisma/contract.d';
 
 class IncidentCollection extends Collection<Contract, 'Incident'> {
-  forService(service: string) {
-    return this.where({ service });
+  forService(service: string): IncidentCollection {
+    return this.where({ service }) as unknown as IncidentCollection;
   }
 
-  newestFirst() {
-    return this.orderBy((incident) => incident.createdAt.desc());
+  newestFirst(): IncidentCollection {
+    return this.orderBy((incident) => incident.createdAt.desc()) as unknown as IncidentCollection;
   }
 }
 
@@ -61,10 +63,10 @@ const incidents = await db.orm.public.Incident
   .all();
 ```
 
-`Collection` here is an application abstraction, not a Prisma Next export. The
-value is the intent-revealing chain: filtering and ordering rules get names that
-match the domain, while `Contract` keeps the model and field names checked by
-TypeScript.
+The value is the intent-revealing chain: filtering and ordering rules get names
+that match the domain, while `Contract` keeps the model and field names checked by
+TypeScript. The behavior is covered by
+[`test/collections.test.ts`](test/collections.test.ts).
 
 Your contract has two companion files in the same directory:
 

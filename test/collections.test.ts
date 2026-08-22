@@ -64,8 +64,8 @@ describe('Prisma collections', () => {
     });
 
     const incidents = await db.orm.public.Incident
-      .where({ service: testService })
-      .orderBy((incident) => incident.createdAt.desc())
+      .forService(testService)
+      .newestFirst()
       .take(2)
       .all();
 
