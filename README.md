@@ -13,6 +13,14 @@ npm run dev
 
 Prérequis : PostgreSQL 15+ et une base locale `incident_manager_workshop`. Copiez `.env.example` vers `.env`.
 
+Pour vérifier tous les endpoints localement, utilisez la base de test dédiée :
+
+```bash
+npm run test:local
+```
+
+La commande initialise et réinitialise `incident_manager_workshop_test` ; elle ne modifie pas la base principale du workshop.
+
 ## Yaak CLI
 
 ```bash

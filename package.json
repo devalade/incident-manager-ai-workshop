@@ -9,6 +9,7 @@
     "start": "node dist/src/server.js",
     "yaak:setup": "bash scripts/setup-yaak.sh",
     "yaak:seed": "bash scripts/seed-yaak.sh",
+    "test:local": "bash scripts/test-local.sh",
     "db:init": "prisma-cli db init",
     "db:reset": "bash scripts/reset-db.sh",
     "test": "vitest run --passWithNoTests",
