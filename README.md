@@ -15,7 +15,13 @@ npm run dev
 - `POST /incidents`
 - `GET /incidents`
 - `GET /incidents/:id`
+- `POST /incidents/:id/assign`
+- `POST /incidents/:id/acknowledge`
+- `POST /incidents/:id/notes`
+- `POST /incidents/:id/resolve`
 - `POST /incidents/:id/escalate`
+- `GET /incidents/:id/events`
+- `GET /dashboard`
 
 ## Déroulé du workshop
 
