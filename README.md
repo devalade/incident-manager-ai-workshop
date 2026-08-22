@@ -10,6 +10,22 @@ npm run typecheck
 npm run dev
 ```
 
+## Yaak CLI
+
+```bash
+npm install -g @yaakapp/cli
+npm run yaak:setup
+yaak workspace list
+```
+
+Le script crée un workspace Yaak avec les requêtes essentielles. Yaak CLI partage les mêmes données locales que l’application desktop.
+
+Pour permettre à un agent de piloter Yaak :
+
+```bash
+yaak agent install
+```
+
 ## API
 
 - `POST /incidents`
