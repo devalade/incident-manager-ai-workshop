@@ -79,11 +79,5 @@ Le jeu contient sept incidents : impacts variés, doublon probable, service inco
 ## Déroulé du workshop
 
 1. Donnez uniquement [TICKET.md](./TICKET.md) à votre agent.
-2. Faites-lui d’abord caractériser le comportement actuel avec des tests, puis refactorer.
-3. Notez ses hypothèses, les changements proposés et les questions qu'il n'a pas posées.
-4. Interrogez l'Incident Manager joué par le facilitateur avant d’implémenter l’escalade automatique.
-5. Comparez le code, les tests, les allers-retours et la supervision nécessaire.
-
-> Participants : ne lisez pas `FACILITATOR.md` avant la phase d'entretien métier.
 
 Le code initial est volontairement désordonné et ne possède aucun test. Il compile et fonctionne. L’objectif est de créer un filet de sécurité avant le refactoring, puis de découvrir les questions métier nécessaires à la nouvelle fonctionnalité.

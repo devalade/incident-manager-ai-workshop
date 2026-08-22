@@ -1,12 +1,5 @@
-# Mission — Sécuriser le legacy puis ajouter l’escalade automatique
-
-Le code fonctionne en production, mais il est difficile à faire évoluer et ne possède aucun test automatisé.
 
 ## Intention 1 — Refactorer sans casser
-
-- identifiez les comportements actuels importants ;
-- ajoutez des tests de caractérisation via l’API publique ;
-- refactorez le code sans modifier ces comportements.
 
 ## Intention 2 — Ajouter la fonctionnalité
 
