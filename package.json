@@ -6,17 +6,24 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "yaak:setup": "bash scripts/setup-yaak.sh",
     "yaak:seed": "bash scripts/seed-yaak.sh",
+    "db:init": "prisma-cli db init",
+    "db:reset": "bash scripts/reset-db.sh",
     "test": "vitest run --passWithNoTests",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "contract:emit": "prisma-cli contract emit"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.1",
+    "@prisma/orm-postgres": "^8.0.0-rc.5",
+    "dotenv": "^17.4.2",
     "hono": "^4.9.6"
   },
   "devDependencies": {
+    "@prisma/cli": "^8.0.0-rc.7",
+    "@prisma/cli-engine": "^0.2.0",
     "@types/node": "^24.3.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",

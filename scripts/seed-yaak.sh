@@ -35,6 +35,7 @@ create_json_request "Seed 10 · Assign identity" POST "http://localhost:3000/inc
 create_json_request "Seed 11 · Resolve catalog" POST "http://localhost:3000/incidents/5/resolve" '{"actor":"dave","resolution":"Image CDN cache refreshed"}'
 create_json_request "Seed 12 · Note on checkout" POST "http://localhost:3000/incidents/1/notes" '{"actor":"incident-manager","text":"Customer support confirms impact in three countries"}'
 
+curl --fail --silent --show-error --request POST http://localhost:3000/workshop/reset >/dev/null
 echo "Sending seed requests to http://localhost:3000"
 while read -r request_id; do
   yaak request send "$request_id" >/dev/null

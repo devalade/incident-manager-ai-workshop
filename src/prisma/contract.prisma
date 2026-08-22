@@ -1,0 +1,60 @@
+// use prisma-next
+
+model Incident {
+  id             Int      @id @default(autoincrement())
+  title          String
+  service        String
+  severity       String
+  status         String   @default("open")
+  owner          String?
+  createdAt      DateTime @default(now())
+  escalated      Boolean  @default(false)
+  acknowledgedAt DateTime?
+  resolvedAt     DateTime?
+  tags           String[]
+  notes          String[]
+  events         IncidentEvent[]
+  notifications  Notification[]
+}
+
+model IncidentEvent {
+  id         Int      @id @default(autoincrement())
+  incident   Incident @relation(fields: [incidentId], references: [id])
+  incidentId Int
+  type       String
+  at         DateTime @default(now())
+  actor      String
+  details    String?
+}
+
+model Service {
+  name              String  @id
+  team              String
+  critical          Boolean @default(false)
+  active            Boolean @default(true)
+  businessHoursOnly Boolean @default(false)
+}
+
+model OnCall {
+  team   String   @id
+  people String[]
+}
+
+model MaintenanceWindow {
+  id       Int      @id @default(autoincrement())
+  service  String
+  startsAt DateTime
+  endsAt   DateTime
+  reason   String
+}
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  incident   Incident @relation(fields: [incidentId], references: [id])
+  incidentId Int
+  channel    String
+  recipient  String
+  message    String
+  sentAt     DateTime @default(now())
+  status     String
+}

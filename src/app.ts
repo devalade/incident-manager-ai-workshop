@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { db } from "./prisma/db.js";
 
 type Incident = {
   id: string;
@@ -82,6 +83,92 @@ export function createApp() {
     "team-commerce": ["dave", "erin"],
     "team-platform": ["frank"],
   };
+
+  let loaded = false;
+  let saving = Promise.resolve();
+  const iso = (value: Date | string | null) => value ? new Date(value).toISOString() : undefined;
+
+  async function loadEverythingFromPostgres() {
+    if (loaded) return;
+    const storedIncidents = await db.orm.public.Incident.orderBy((row) => row.id.asc()).all();
+    const storedEvents = await db.orm.public.IncidentEvent.orderBy((row) => row.id.asc()).all();
+    const storedServices = await db.orm.public.Service.orderBy((row) => row.name.asc()).all();
+    const storedOnCall = await db.orm.public.OnCall.orderBy((row) => row.team.asc()).all();
+    const storedMaintenance = await db.orm.public.MaintenanceWindow.orderBy((row) => row.id.asc()).all();
+    const storedNotifications = await db.orm.public.Notification.orderBy((row) => row.id.asc()).all();
+
+    incidents.splice(0, incidents.length, ...storedIncidents.map((row) => ({
+      ...row, id: String(row.id), tags: [...row.tags], notes: [...row.notes], createdAt: iso(row.createdAt)!,
+      acknowledgedAt: iso(row.acknowledgedAt), resolvedAt: iso(row.resolvedAt), owner: row.owner ?? undefined,
+    })));
+    events.splice(0, events.length, ...storedEvents.map((row) => ({
+      incidentId: String(row.incidentId), type: row.type, at: iso(row.at)!, actor: row.actor,
+      details: row.details ?? undefined,
+    })));
+    maintenance.splice(0, maintenance.length, ...storedMaintenance.map((row) => ({
+      id: String(row.id), service: row.service, startsAt: iso(row.startsAt)!, endsAt: iso(row.endsAt)!, reason: row.reason,
+    })));
+    notifications.splice(0, notifications.length, ...storedNotifications.map((row) => ({
+      id: String(row.id), incidentId: String(row.incidentId), channel: row.channel, recipient: row.recipient,
+      message: row.message, sentAt: iso(row.sentAt)!, status: row.status as "sent" | "failed",
+    })));
+    if (storedServices.length) services.splice(0, services.length, ...storedServices);
+    for (const service of services) teams[service.name] = service.team;
+    for (const row of storedOnCall) onCall[row.team] = [...row.people];
+    nextId = Math.max(0, ...incidents.map((row) => Number(row.id))) + 1;
+    nextMaintenanceId = Math.max(0, ...maintenance.map((row) => Number(row.id))) + 1;
+    nextNotificationId = Math.max(0, ...notifications.map((row) => Number(row.id))) + 1;
+    loaded = true;
+    if (!storedServices.length) await saveEverythingToPostgres();
+  }
+
+  async function saveEverythingToPostgres() {
+    saving = saving.then(async () => {
+      await db.transaction(async (tx) => {
+        await tx.orm.public.IncidentEvent.where((row) => row.id.gte(0)).deleteAll();
+        await tx.orm.public.Notification.where((row) => row.id.gte(0)).deleteAll();
+        await tx.orm.public.Incident.where((row) => row.id.gte(0)).deleteAll();
+        await tx.orm.public.MaintenanceWindow.where((row) => row.id.gte(0)).deleteAll();
+        await tx.orm.public.Service.where((row) => row.name.isNotNull()).deleteAll();
+        await tx.orm.public.OnCall.where((row) => row.team.isNotNull()).deleteAll();
+        for (const service of services) await tx.orm.public.Service.create(service);
+        for (const [team, people] of Object.entries(onCall)) await tx.orm.public.OnCall.create({ team, people });
+        for (const incident of incidents) await tx.orm.public.Incident.create({
+          ...incident, id: Number(incident.id), owner: incident.owner ?? null,
+          createdAt: new Date(incident.createdAt), acknowledgedAt: incident.acknowledgedAt ? new Date(incident.acknowledgedAt) : null,
+          resolvedAt: incident.resolvedAt ? new Date(incident.resolvedAt) : null,
+        });
+        for (const event of events) await tx.orm.public.IncidentEvent.create({
+          incidentId: Number(event.incidentId), type: event.type, at: new Date(event.at), actor: event.actor,
+          details: event.details ?? null,
+        });
+        for (const window of maintenance) await tx.orm.public.MaintenanceWindow.create({
+          ...window, id: Number(window.id), startsAt: new Date(window.startsAt), endsAt: new Date(window.endsAt),
+        });
+        for (const notification of notifications) await tx.orm.public.Notification.create({
+          ...notification, id: Number(notification.id), incidentId: Number(notification.incidentId), sentAt: new Date(notification.sentAt),
+        });
+      });
+    });
+    return saving;
+  }
+
+  app.use("*", async (c, next) => {
+    await loadEverythingFromPostgres();
+    await next();
+    if (!["GET", "HEAD", "OPTIONS"].includes(c.req.method)) await saveEverythingToPostgres();
+  });
+
+  app.post("/workshop/reset", (c) => {
+    incidents.splice(0);
+    events.splice(0);
+    maintenance.splice(0);
+    notifications.splice(0);
+    nextId = 1;
+    nextMaintenanceId = 1;
+    nextNotificationId = 1;
+    return c.json({ reset: true });
+  });
 
   app.get("/health", (c) => c.json({ status: "ok" }));
   app.get("/incidents", (c) => {

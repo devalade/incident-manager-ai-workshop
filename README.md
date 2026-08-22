@@ -6,9 +6,12 @@ Petite API TypeScript/Hono utilisée pour montrer qu'un agent ne peut pas compen
 
 ```bash
 npm install
+npm run db:init
 npm run typecheck
 npm run dev
 ```
+
+Prérequis : PostgreSQL 15+ et une base locale `incident_manager_workshop`. Copiez `.env.example` vers `.env`.
 
 ## Yaak CLI
 
@@ -26,7 +29,7 @@ Pour permettre à un agent de piloter Yaak :
 yaak agent install
 ```
 
-Avec l’API démarrée dans un autre terminal, chargez les données du workshop :
+Avec l’API démarrée dans un autre terminal, réinitialisez et chargez les données du workshop :
 
 ```bash
 npm run yaak:seed
