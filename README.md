@@ -22,6 +22,24 @@ npm run dev
 - `POST /incidents/:id/escalate`
 - `GET /incidents/:id/events`
 - `GET /dashboard`
+- `POST /incidents/bulk`
+- `GET /incidents/:id/sla`
+- `GET /incidents/:id/similar`
+- `POST /incidents/:id/merge`
+- `POST /incidents/:id/reopen`
+- `POST /incidents/:id/notify`
+- `GET /incidents/:id/notifications`
+- `GET /services`
+- `POST /services`
+- `PATCH /services/:name`
+- `GET|PUT /teams/:team/on-call`
+- `GET|POST /maintenance`
+- `DELETE /maintenance/:id`
+- `GET /reports/daily`
+- `PATCH /incidents/:id/severity`
+- `POST /incidents/:id/suppress`
+- `GET /audit`
+- `GET /export/incidents.csv`
 
 ## Déroulé du workshop
 
