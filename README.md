@@ -26,6 +26,14 @@ Pour permettre à un agent de piloter Yaak :
 yaak agent install
 ```
 
+Avec l’API démarrée dans un autre terminal, chargez les données du workshop :
+
+```bash
+npm run yaak:seed
+```
+
+Le jeu contient sept incidents : impacts variés, doublon probable, service inconnu, maintenance, incident acquitté, affecté et résolu.
+
 ## API
 
 - `POST /incidents`
